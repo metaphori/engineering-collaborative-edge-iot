@@ -1,0 +1,156 @@
+variables:
+  random: &random
+    min: 2
+    max: 51
+    step: 1
+    default: 3
+  commRadius: &commRadius
+    min: 1.0
+    max: 500
+    step: 100
+    default: 50
+  batchFreq: &batchFreq
+    formula: 10
+  leaderElectionGrain: &leaderElectionGrain
+    formula: "$commRadius * 5"
+  smartness: &smartness
+    min: 0.0
+    max: 1.0
+    step: 1.0
+    default: 1.0
+  latStart: &latStart
+    formula: 48.2087
+  latEnd: &latEnd
+    formula: 48.2123
+  latSize: &latSize
+    formula: "$latEnd - $latStart"
+  longStart: &longStart
+    formula: 16.3748
+  longEnd: &longEnd
+    formula: 16.3815
+  longSize: &longSize
+    formula: "$longEnd - $longStart"
+  numRobots: &numRobots
+    formula: 250
+  numPeople: &numPeople
+    formula: 50
+  numEdgeServers: &numEdgeServers
+    formula: 10
+  startProblemDetectionParameter: &startProblemDetectionParameter
+    formula: 150
+  endProblemDetectionParameter: &endProblemDetectionParameter
+    formula: 600
+
+export:
+  - time
+  - molecule: problemsUnassigned
+    aggregators: [sum]
+    value-filter: FilterNaN
+  - molecule: problemsAssigned
+    aggregators: [sum]
+    value-filter: FilterNaN
+  - molecule: problemsFinished
+    aggregators: [sum]
+    value-filter: FilterNaN
+  - molecule: problemsFound
+    aggregators: [sum]
+    value-filter: FilterNaN
+  - molecule: problemsCompleted
+    aggregators: [sum]
+    value-filter: FilterNaN
+
+seeds:
+  scenario: *random
+  simulation: *random
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: [*commRadius]
+  
+incarnation: scafi
+
+pools:
+  - pool: &program
+    - time-distribution: 1
+      type: Event
+      actions:
+        - type: RunScafiProgram
+          parameters: [it.unibo.casestudy.CaseStudy, 20]
+  - pool: &contents
+    - molecule: source
+      concentration: 0
+    - molecule: commRadius
+      concentration: *commRadius
+    - molecule: batchFreq
+      concentration: *batchFreq
+    - molecule: leaderElectionGrain
+      concentration: *leaderElectionGrain
+    - molecule: role
+      concentration: 0
+    - molecule: smartness
+      concentration: 0.0
+    - molecule: startProblemDetectionParameter
+      concentration: *startProblemDetectionParameter
+    - molecule: endProblemDetectionParameter
+      concentration: *endProblemDetectionParameter
+  - pool: &contentsHuman
+    - molecule: source
+      concentration: 0
+    - molecule: commRadius
+      concentration: *commRadius
+    - molecule: batchFreq
+      concentration: *batchFreq
+    - molecule: leaderElectionGrain
+      concentration: *leaderElectionGrain
+    - molecule: role
+      concentration: 1
+    - molecule: smartness
+      concentration: 0.0
+    - molecule: startProblemDetectionParameter
+      concentration: *startProblemDetectionParameter
+    - molecule: endProblemDetectionParameter
+      concentration: *endProblemDetectionParameter
+  - pool: &contentsCoordinator
+    - molecule: source
+      concentration: 0
+    - molecule: commRadius
+      concentration: *commRadius
+    - molecule: batchFreq
+      concentration: *batchFreq
+    - molecule: leaderElectionGrain
+      concentration: *leaderElectionGrain
+    - molecule: role
+      concentration: 2
+    - molecule: smartness
+      concentration: *smartness
+    - molecule: startProblemDetectionParameter
+      concentration: *startProblemDetectionParameter
+    - molecule: endProblemDetectionParameter
+      concentration: *endProblemDetectionParameter
+
+environment:
+  type: OSMEnvironment
+  parameters: [vienna.osm.pbf, false, false]
+
+positions:
+  type: LatLongPosition
+  
+displacements:
+  - in:
+      type: Rectangle
+      parameters: [*numRobots, *latStart, *longStart, *latSize, *longSize]
+    programs:
+      - *program
+    contents: *contents
+  - in:
+      type: Rectangle
+      parameters: [*numPeople, *latStart, *longStart, *latSize, *longSize]
+    programs:
+    - *program
+    contents: *contentsHuman
+  - in:
+      type: Rectangle
+      parameters: [*numEdgeServers, *latStart, *longStart, *latSize, *longSize]
+    programs:
+    - *program
+    contents: *contentsCoordinator

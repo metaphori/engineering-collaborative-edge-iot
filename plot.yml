@@ -1,0 +1,22 @@
+# Goal is to show reactivity to spikes of load, withstanding leader failures, and the benefit of an updated metric
+the_plots_labels:
+  - Time
+  - Problems unhandled
+  - Problems assigned
+  - Problems solved
+  - Problems found
+  - Problems completed
+the_plots_formats:
+  - [0,4,1,2,5]
+#file_suffixes:
+#  - errors
+line_widths:
+  - [1,1,1,1,1,1]
+default_colors: &default_colors ["black","red", "blue","brown","orange","darkgreen"]
+the_plots_colors:
+  - *default_colors
+legend_position:
+  - "upper left"
+#force_limit_plot_y: [1000]
+sampling: true
+#title_prefix: ''

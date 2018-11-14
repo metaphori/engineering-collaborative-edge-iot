@@ -1,0 +1,52 @@
+variables:
+  random: &random
+    min: 0
+    max: 5
+    step: 1
+    default: 0
+  commRadius: &commRadius
+    min: 2.0
+    max: 10
+    step: 1
+    default: 1.5
+  batchFreq: &batchFreq
+    formula: 10
+
+export:
+  - time
+
+seeds:
+  scenario: *random
+  simulation: *random
+
+network-model:
+  type: EuclideanDistance
+  parameters: [*commRadius]
+  
+incarnation: scafi
+
+pools:
+  - pool: &program
+    - time-distribution: 1
+      type: Event
+      actions:
+        - type: RunScafiProgram
+          parameters: [it.unibo.casestudy.Gradient, 20]
+  - pool: &contents
+    - molecule: source
+      concentration: 0
+    - molecule: commRadius
+      concentration: *commRadius
+    - molecule: batchFreq
+      concentration: *batchFreq
+
+positions:
+  type: Continuous2DEuclidean
+  
+displacements:
+  - in:
+      type: Grid 
+      parameters: [0, 0, 20, 20, 1, 1, 0.8, 0.8]
+    programs:
+      - *program
+    contents: *contents
